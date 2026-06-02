@@ -1,0 +1,27 @@
+# Credentials
+config.py
+
+# Personal files
+*.pdf
+resume.*
+
+# Data files
+companies.csv
+archive.csv
+sent_emails_log.csv
+followup_log.csv
+discovered_companies.csv
+hunter_usage.json
+
+# Logs
+logs/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/
