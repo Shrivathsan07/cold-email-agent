@@ -2,6 +2,11 @@
 
 Sends personalized cold emails + auto follow-ups to startup founders across multiple industries.
 
+> **Also in this repo: the [Recruiting Command Center](RECRUITING.md).** Pulls open
+> SWE, PM and deployed-engineering roles from nine GitHub job boards every morning,
+> ranks them for big tech, emails you a short list, tracks your pipeline and
+> outreach, and runs a LeetCode plan. `python3 -m recruit setup` to start.
+
 **Targets:** 25+ Healthcare AI | 10 Legal AI | 10 Finance AI | 5 Supply Chain/Cyber/Defense
 
 ## Quick Start (if upgrading from v2)

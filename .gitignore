@@ -1,5 +1,6 @@
 # Credentials
 config.py
+recruit_config.py
 
 # Personal files
 *.pdf
@@ -12,6 +13,10 @@ sent_emails_log.csv
 followup_log.csv
 discovered_companies.csv
 hunter_usage.json
+
+# Recruiting system: the full listing cache is ~900KB and is rebuilt by every
+# sync, so it stays out of git. data/job_state.csv keeps the durable half.
+data/jobs.csv
 
 # Logs
 logs/

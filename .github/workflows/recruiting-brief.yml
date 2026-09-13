@@ -1,0 +1,78 @@
+name: Daily recruiting brief
+
+# Pulls every job board, ranks what is new, and emails you the brief.
+# The committed state files (applications, contacts, leetcode log, job_state)
+# are what let each run remember the last one.
+
+on:
+  schedule:
+    # 11:00 UTC = 7am ET / 4am PT on weekdays. Postings that go up overnight
+    # are in the brief before you are awake.
+    - cron: "0 11 * * 1-5"
+    # Sunday evening planning pass.
+    - cron: "0 23 * * 0"
+  workflow_dispatch:
+    inputs:
+      send_email:
+        description: "Email the brief (otherwise just print it in the log)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recruiting-brief
+  cancel-in-progress: false
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Pull the job boards
+        env:
+          PROFILE_JSON: ${{ secrets.RECRUIT_PROFILE_JSON }}
+        run: |
+          if [ -n "$PROFILE_JSON" ]; then
+            python3 - <<'PY'
+          import json, os, pathlib
+          # RECRUIT_PROFILE_JSON is an optional secret holding the same dict as
+          # PROFILE in recruit_config.py, so the workflow can filter on your
+          # sponsorship and clearance situation without committing it.
+          profile = json.loads(os.environ["PROFILE_JSON"])
+          pathlib.Path("recruit_config.py").write_text("PROFILE = " + repr(profile) + "\n")
+          PY
+          fi
+          python3 -m recruit sync
+
+      - name: Send the brief
+        if: github.event_name == 'schedule' || inputs.send_email
+        env:
+          RECRUIT_EMAIL_ADDRESS: ${{ secrets.RECRUIT_EMAIL_ADDRESS }}
+          RECRUIT_EMAIL_PASSWORD: ${{ secrets.RECRUIT_EMAIL_PASSWORD }}
+          RECRUIT_EMAIL_TO: ${{ secrets.RECRUIT_EMAIL_TO }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 -m recruit report --email
+
+      - name: Print the brief
+        if: always()
+        run: python3 -m recruit report
+
+      - name: Commit what changed
+        run: |
+          rm -f recruit_config.py
+          git config user.name "recruiting-bot"
+          git config user.email "actions@github.com"
+          git add data/   # jobs.csv is gitignored, so this is just the small state files
+          if git diff --cached --quiet; then
+            echo "nothing changed"
+          else
+            git commit -m "chore: daily recruiting sync $(date -u +%Y-%m-%d)"
+            git push
+          fi
