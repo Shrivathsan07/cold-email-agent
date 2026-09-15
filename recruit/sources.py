@@ -439,6 +439,8 @@ def _url_key(job):
     url = (job.get("url") or "").split("?")[0].rstrip("/").lower()
     if not url or "jobright.ai" in url:
         return ""  # jobright mints its own per-listing ids, not the employer's
+    # ".../<req-id>" and ".../<req-id>/application" are the same posting
+    url = re.sub(r"/(application|apply)$", "", url)
     return f"url:{url}"
 
 
