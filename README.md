@@ -1,29 +1,24 @@
-# Cold Email Agent v3 - Multi-Vertical
+# Cold Email Agent
 
-Sends personalized cold emails + auto follow-ups to startup founders across multiple industries.
+A Python agent that finds startups, verifies founder emails, writes each one a personal note with Claude, and sends on a schedule with follow-ups.
 
-**Targets:** 25+ Healthcare AI | 10 Legal AI | 10 Finance AI | 5 Supply Chain/Cyber/Defense
+**Results:** 200+ emails sent, 10+ founder conversations, and the outreach that led to my Channel3 (YC S25) internship.
 
-## Quick Start (if upgrading from v2)
+## How it works
+1. **Discover** startups by vertical (healthcare, legal, finance and more) from YC's public directory, backfilling automatically when a vertical runs short.
+2. **Find the right email:** scrape each company's site and rank addresses (founder name first), with optional Hunter.io lookup and pattern guessing as a last resort.
+3. **Write:** Claude drafts a personal note per company using vertical-specific voice rules.
+4. **Guardrails:** every draft is checked for length, required details, the company name and banned phrases; failures retry twice, then skip.
+5. **Send safely:** Gmail SMTP with random 2-6 minute delays, a per-run cap, and dry run by default.
+6. **Follow up** once after 5 days, in the same thread.
 
-1. Replace `agent.py`, `discover.py`, and `config.py` with the new versions
-2. Fill in your credentials in `config.py` (same as before)
-3. Your existing `companies.csv` will be auto-upgraded (adds `vertical` column)
-4. Run discovery to populate new verticals:
-```bash
-python3 discover.py --auto
-```
-5. Dry run to test:
-```bash
-python3 agent.py send
-```
-6. When ready, set `dry_run: False` in config.py and send for real.
+**Stack:** Python, Claude API, Gmail SMTP, Hunter.io (optional).
 
-## Setup (fresh install, ~10 minutes)
+## Setup (~10 minutes)
 
 ### Step 1: Install Python + dependency
 ```bash
-cd ~/Desktop/cold-email-agent
+cd cold-email-agent
 pip3 install anthropic
 ```
 
@@ -161,9 +156,9 @@ python3 agent.py followup
 ```
 
 ## Safety
-- **Dry run by default** — nothing sends until you flip the switch
-- Gmail daily limit: ~500/day. We send 40 max per run. You're fine.
+- **Dry run by default:** nothing sends until you flip the switch
+- Sends at most 40 per run, well under Gmail's ~500/day limit
 - 2-6 min random delays between emails
 - Bounced emails logged and skipped
 - CSV saved after every single send
-- Password in plaintext in config.py — don't push to GitHub
+- Credentials live in config.py, which is git-ignored
